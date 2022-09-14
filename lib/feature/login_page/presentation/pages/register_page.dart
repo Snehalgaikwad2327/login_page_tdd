@@ -1,5 +1,8 @@
+// ignore_for_file: prefer_final_fields, unused_field, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_login_page/feature/login_page/presentation/pages/validations.dart';
 
 import 'package:form_field_validator/form_field_validator.dart';
 
@@ -14,23 +17,9 @@ class RegisterPage extends StatefulWidget {
 }
 
 class RegisterPageState extends State<RegisterPage> {
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  String? validatepass(value) {
-    if (value!.isEmpty) {
-      return "Required*";
-    } else if (value.length < 6) {
-      return "Should be At least 6 character";
-    } else if (value.length > 6) {
-      return "Should Not be more than 15 character";
-    } else {
-      return null;
-    }
-  }
-
   String? validateAge(value) {
     if (value!.isEmpty) {
-      return "Required*";
+      return "Age is Required";
     } else if (value.length < 1) {
       return "Should be At least 1 character";
     } else if (value.length > 3) {
@@ -38,6 +27,24 @@ class RegisterPageState extends State<RegisterPage> {
     } else {
       return null;
     }
+  }
+
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+
+  late String _email;
+  late String _password;
+
+  bool _autoValidate = false;
+
+  late bool _passwordVisible;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordVisible = false;
   }
 
   @override
@@ -58,10 +65,8 @@ class RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                // ignore: prefer_const_constructors
                 Text(
                   "REGISTER",
-                  // ignore: prefer_const_constructors
                   style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -73,14 +78,12 @@ class RegisterPageState extends State<RegisterPage> {
                 ),
                 Form(
                   autovalidateMode: AutovalidateMode.always,
-                  key: formKey,
+                  key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      // ignore: prefer_const_constructors
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
-                        // ignore: prefer_const_constructors
                         child: Text(
                           "Name",
                           style: const TextStyle(
@@ -98,18 +101,17 @@ class RegisterPageState extends State<RegisterPage> {
                           keyboardType: TextInputType.name,
                           style: const TextStyle(
                               color: Colors.black, fontSize: 15),
-                          // ignore: prefer_const_constructors
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Enter Name",
                           ),
-                          validator: RequiredValidator(errorText: "Required*"),
+                          validator:
+                              RequiredValidator(errorText: "Name is Required"),
                         ),
                       ),
                       const SizedBox(
                         height: 10.0,
                       ),
-
                       const Padding(
                         padding: EdgeInsets.only(left: 15),
                         child: Text(
@@ -129,7 +131,6 @@ class RegisterPageState extends State<RegisterPage> {
                           keyboardType: TextInputType.number,
                           style: const TextStyle(
                               color: Colors.black, fontSize: 15),
-                          // ignore: prefer_const_constructors
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Enter Age",
@@ -140,7 +141,6 @@ class RegisterPageState extends State<RegisterPage> {
                       const SizedBox(
                         height: 10.0,
                       ),
-                      // ignore: prefer_const_constructors
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
                         child: const Text(
@@ -160,26 +160,24 @@ class RegisterPageState extends State<RegisterPage> {
                         alignment: Alignment.centerLeft,
                         margin: const EdgeInsets.all(10.0),
                         child: TextFormField(
-                            keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(
-                                color: Colors.black, fontSize: 15),
-                            // ignore: prefer_const_constructors
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: "Enter Email",
-                            ),
-                            validator: MultiValidator([
-                              RequiredValidator(errorText: "Required*"),
-                              EmailValidator(errorText: "Not a Valid Email"),
-                            ])),
+                          keyboardType: TextInputType.emailAddress,
+                          autofocus: false,
+                          controller: _emailController,
+                          validator: validateEmail,
+                          onSaved: (value) => _email = value!,
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 15),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Enter Email",
+                          ),
+                        ),
                       ),
                       const SizedBox(
                         height: 10.0,
                       ),
-                      // ignore: prefer_const_constructors
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
-                        // ignore: prefer_const_constructors
                         child: Text(
                           "Password",
                           style: const TextStyle(
@@ -197,14 +195,27 @@ class RegisterPageState extends State<RegisterPage> {
                         alignment: Alignment.centerLeft,
                         margin: const EdgeInsets.all(10.0),
                         child: TextFormField(
-                          obscureText: true,
-                          style: const TextStyle(
-                              color: Colors.black, fontSize: 15),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Enter Password",
-                          ),
-                          validator: validatepass,
+                          keyboardType: TextInputType.text,
+                          controller: _passwordController,
+                          validator: validatePassword,
+                          onSaved: (value) => _password = value!,
+                          obscureText: !_passwordVisible,
+                          style: TextStyle(color: Colors.black, fontSize: 15),
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Enter Password",
+                              suffixIcon: IconButton(
+                                  onPressed: () async {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.black,
+                                  ))),
                         ),
                       ),
                       const SizedBox(
@@ -216,7 +227,13 @@ class RegisterPageState extends State<RegisterPage> {
                 CustomButton(
                     text: "Register",
                     onpress: () {
-                      BlocProvider.of<LoginBloc>(context).applySignIn();
+                      if (_formKey.currentState!.validate()) {
+                        BlocProvider.of<LoginBloc>(context).applySignIn();
+                      } else {
+                        setState(() {
+                          _autoValidate = true;
+                        });
+                      }
                     })
               ],
             ),

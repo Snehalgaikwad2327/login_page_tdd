@@ -1,9 +1,8 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, unused_field
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:form_field_validator/form_field_validator.dart';
+import 'package:flutter_login_page/feature/login_page/presentation/pages/validations.dart';
 
 import '../bloc/login_bloc.dart';
 import '../widgets/button.dart';
@@ -16,18 +15,22 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
-  String? validatepass(value) {
-    if (value!.isEmpty) {
-      return "Required";
-    } else if (value.length < 6) {
-      return "Should be At least 6 character";
-    } else if (value.length > 6) {
-      return "Should Not be more than 15 character";
-    } else {
-      return null;
-    }
+  final _formKey = GlobalKey<FormState>();
+
+  late String _email;
+  late String _password;
+
+  bool _autoValidate = false;
+
+  late bool _passwordVisible;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordVisible = false;
   }
 
   @override
@@ -57,7 +60,7 @@ class LoginScreenState extends State<LoginScreen> {
               ),
               Form(
                 autovalidateMode: AutovalidateMode.always,
-                key: formKey,
+                key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -80,16 +83,17 @@ class LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerLeft,
                       margin: EdgeInsets.all(10.0),
                       child: TextFormField(
-                          keyboardType: TextInputType.emailAddress,
-                          style: TextStyle(color: Colors.black, fontSize: 20),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Enter Email",
-                          ),
-                          validator: MultiValidator([
-                            RequiredValidator(errorText: "Required*"),
-                            EmailValidator(errorText: "Not a Valid Email"),
-                          ])),
+                        keyboardType: TextInputType.emailAddress,
+                        autofocus: false,
+                        controller: _emailController,
+                        validator: validateEmail,
+                        onSaved: (value) => _email = value!,
+                        style: TextStyle(color: Colors.black, fontSize: 20),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Enter Email",
+                        ),
+                      ),
                     ),
                     SizedBox(
                       height: 2.0,
@@ -113,13 +117,30 @@ class LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerLeft,
                       margin: EdgeInsets.all(10.0),
                       child: TextFormField(
-                        obscureText: true,
+                        keyboardType: TextInputType.text,
+                        obscureText: !_passwordVisible,
+
+                        controller: _passwordController,
+                        validator: validatePassword,
+                        onSaved: (value) => _password = value!,
                         style: TextStyle(color: Colors.black, fontSize: 20),
                         decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Enter Password",
-                        ),
-                        validator: validatepass,
+                            border: InputBorder.none,
+                            hintText: "Enter Password",
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _passwordVisible = !_passwordVisible;
+                                });
+                              },
+                              icon: Icon(
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.black,
+                              ),
+                            )),
+                        // validator  : validatepass,
                       ),
                     ),
                     SizedBox(
@@ -131,7 +152,13 @@ class LoginScreenState extends State<LoginScreen> {
               CustomButton(
                   text: "Login",
                   onpress: () {
-                    BlocProvider.of<LoginBloc>(context).applyLogout();
+                    if (_formKey.currentState!.validate()) {
+                      BlocProvider.of<LoginBloc>(context).applyLogout();
+                    } else {
+                      setState(() {
+                        _autoValidate = true;
+                      });
+                    }
                   })
             ],
           )
