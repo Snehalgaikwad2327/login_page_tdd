@@ -12,9 +12,9 @@ class UserDetailsModel extends UserDetails {
   factory UserDetailsModel.fromJson(Map<String, dynamic> json) {
     return UserDetailsModel(
         name: json['name'],
-        age: json['age'],
+        age: int.parse(json['age']),
         emailId: json['emailId'],
-        password: json['passwors']);
+        password: json['password']);
   }
 
   Map<String, dynamic> toJson() {

@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final serviceLocator = GetIt.instance;
 
-void init() async {
+Future<void> init() async {
   serviceLocator.registerFactory(() => LoginBloc(
       checkLoginData: serviceLocator(),
       getScreenName: serviceLocator(),
@@ -39,8 +39,6 @@ void init() async {
   serviceLocator.registerLazySingleton<UserDetailsLocalDataSource>(
     () => UserDetailsLocalDataSourceImpl(sharedPreferences: serviceLocator()),
   );
-
-  //External
 
   final sharedPreferences = await SharedPreferences.getInstance();
   serviceLocator.registerLazySingleton(() => sharedPreferences);

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_login_page/feature/login_page/domain/entities/user_details.dart';
 import 'package:flutter_login_page/feature/login_page/presentation/pages/validations.dart';
 
 import 'package:form_field_validator/form_field_validator.dart';
@@ -19,7 +20,7 @@ class RegisterPage extends StatefulWidget {
 class RegisterPageState extends State<RegisterPage> {
   String? validateAge(value) {
     if (value!.isEmpty) {
-      return "Age is Required";
+      return "Age is Required*";
     } else if (value.length < 1) {
       return "Should be At least 1 character";
     } else if (value.length > 3) {
@@ -29,11 +30,16 @@ class RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _ageController = TextEditingController();
+
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
+  late String _name;
+  late String _age;
   late String _email;
   late String _password;
 
@@ -98,6 +104,7 @@ class RegisterPageState extends State<RegisterPage> {
                         alignment: Alignment.centerLeft,
                         margin: const EdgeInsets.all(10.0),
                         child: TextFormField(
+                          controller: _nameController,
                           keyboardType: TextInputType.name,
                           style: const TextStyle(
                               color: Colors.black, fontSize: 15),
@@ -106,7 +113,7 @@ class RegisterPageState extends State<RegisterPage> {
                             hintText: "Enter Name",
                           ),
                           validator:
-                              RequiredValidator(errorText: "Name is Required"),
+                              RequiredValidator(errorText: "Name is Required*"),
                         ),
                       ),
                       const SizedBox(
@@ -128,6 +135,7 @@ class RegisterPageState extends State<RegisterPage> {
                         alignment: Alignment.centerLeft,
                         margin: const EdgeInsets.all(10.0),
                         child: TextFormField(
+                          controller: _ageController,
                           keyboardType: TextInputType.number,
                           style: const TextStyle(
                               color: Colors.black, fontSize: 15),
@@ -228,6 +236,13 @@ class RegisterPageState extends State<RegisterPage> {
                     text: "Register",
                     onpress: () {
                       if (_formKey.currentState!.validate()) {
+                        BlocProvider.of<LoginBloc>(context).saveUserDetails(
+                            UserDetails(
+                                name: _nameController.text,
+                                age: int.parse(_ageController.text),
+                                emailId: _emailController.text,
+                                password: _passwordController.text));
+
                         BlocProvider.of<LoginBloc>(context).applySignIn();
                       } else {
                         setState(() {

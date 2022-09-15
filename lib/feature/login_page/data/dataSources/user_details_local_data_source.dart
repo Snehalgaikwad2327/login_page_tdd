@@ -1,7 +1,5 @@
 // ignore_for_file: constant_identifier_names, unnecessary_null_comparison
 
-import 'dart:convert';
-
 import 'package:flutter_login_page/core/error/exception.dart';
 import 'package:flutter_login_page/feature/login_page/data/models/user_details-model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,7 +30,12 @@ class UserDetailsLocalDataSourceImpl implements UserDetailsLocalDataSource {
 
   @override
   Future<String> getScreenName() {
-    final getscreenData = sharedPreferences.getString(SCREEN_NAME);
+    print("get screen name");
+    String? getscreenData = sharedPreferences.getString(SCREEN_NAME);
+
+    print("get screen data");
+    print(getscreenData);
+
     if (getscreenData != null) {
       return Future.value(getscreenData);
     } else {
@@ -42,9 +45,21 @@ class UserDetailsLocalDataSourceImpl implements UserDetailsLocalDataSource {
 
   @override
   Future<UserDetailsModel> getUserDetails() {
+    print("get user details");
     final getUserData = sharedPreferences.getString(USER_DETAILS);
     if (getUserData != null) {
-      return Future.value(UserDetailsModel.fromJson(json.decode(getUserData)));
+      List<String> str = getUserData
+          .replaceAll("{", "")
+          .replaceAll("}", "")
+          .replaceAll("\"", "")
+          .replaceAll("'", "")
+          .split(",");
+      Map<String, dynamic> result = {};
+      for (int i = 0; i < str.length; i++) {
+        List<String> s = str[i].split(":");
+        result.putIfAbsent(s[0].trim(), () => s[1].trim());
+      }
+      return Future.value(UserDetailsModel.fromJson(result));
     } else {
       throw CacheException();
     }
@@ -52,16 +67,18 @@ class UserDetailsLocalDataSourceImpl implements UserDetailsLocalDataSource {
 
   @override
   Future<bool> isRemember() {
+    print("get remember data");
     final isRememberData = sharedPreferences.getBool(BOOL_DATA);
     if (isRememberData != null) {
-      return Future.value(true);
+      return Future.value(isRememberData);
     } else {
       throw CacheException();
     }
   }
 
   @override
-  Future setRememberData(bool value) {
+  Future<bool> setRememberData(bool value) {
+    print("set remember data");
     final setRemember = sharedPreferences.setBool(BOOL_DATA, value);
     if (setRemember != null) {
       return Future.value(setRemember);
@@ -72,16 +89,14 @@ class UserDetailsLocalDataSourceImpl implements UserDetailsLocalDataSource {
 
   @override
   Future setScreenName(String screenName) {
-    final setscreenData = sharedPreferences.getString(SCREEN_NAME);
-    if (setscreenData != null) {
-      return Future.value(setscreenData);
-    } else {
-      throw CacheException();
-    }
+    print("set screen name");
+
+    return Future.value(sharedPreferences.setString(SCREEN_NAME, screenName));
   }
 
   @override
-  Future setUserDetails(UserDetailsModel userDetailsModel) {
+  Future<bool> setUserDetails(UserDetailsModel userDetailsModel) {
+    print("set user data");
     final setUserData = sharedPreferences.setString(
         USER_DETAILS, userDetailsModel.toJson().toString());
     if (setUserData != null) {
@@ -93,13 +108,14 @@ class UserDetailsLocalDataSourceImpl implements UserDetailsLocalDataSource {
 
   @override
   Future<bool> checkLoginData(String emailId, String password) async {
+    print("check login data");
     UserDetailsModel userDetailsModel = await getUserDetails();
 
     if (userDetailsModel.emailId == emailId &&
         userDetailsModel.password == password) {
       return Future.value(true);
     } else {
-      throw CacheException();
+      return Future.value(false);
     }
   }
 }

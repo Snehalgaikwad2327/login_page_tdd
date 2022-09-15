@@ -1,8 +1,9 @@
 // ignore_for_file: depend_on_referenced_packages
 
+//  import 'dart:js_util';
+
 import 'package:bloc/bloc.dart';
 import 'package:dartz/dartz.dart';
-import 'dart:js_util';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_page/core/error/failure.dart';
 import 'package:flutter_login_page/feature/login_page/domain/entities/user_details.dart';
@@ -38,19 +39,28 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       : super(LoginInitial()) {
     on<LoginEvent>((event, emit) {});
 
+    on<WelcomeEvent>((event, emit) {
+      saveScreenName("Screen1");
+      emit(WelcomeState());
+    });
+
     on<RegisterEvent>((event, emit) {
+      saveScreenName("Screen2");
       emit(Register());
     });
 
     on<SignInEvent>((event, emit) {
+      saveScreenName("Screen3");
       emit(SignIn());
     });
 
     on<LoginPageEvent>((event, emit) {
+      saveScreenName("Screen4");
       emit(LoginPage());
     });
 
     on<LogoutEvent>((event, emit) {
+      saveScreenName("Screen3");
       emit(Logout());
     });
   }
@@ -87,35 +97,58 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     setRememberData(value: value);
   }
 
-  void userDetails() {
-    Either<Failure, UserDetails> eitherData;
-  }
-
   void screenname() async {
     Either<Failure, String> either;
     either = await getScreenName();
 
-    either.fold((screenFailure) => null, (screenString) => null);
+    bool isChecked = await isGetRemember();
+
+    either.fold((screenFailure) => add(WelcomeEvent()), (screenString) {
+      print(screenString);
+      if (screenString == "Screen1") {
+        add(WelcomeEvent());
+      } else if (screenString == "Screen2") {
+        add(RegisterEvent());
+      } else if (screenString == "Screen3" && isChecked == false) {
+        add(SignInEvent());
+      } else if (screenString == "Screen4") {
+        add(LoginPageEvent());
+      } else if (isChecked == true) {
+        add(LogoutEvent());
+      }
+    });
   }
 
   void userDetailData() async {
     Either<Failure, UserDetails> either;
     either = await getUserDetails();
 
-    either.fold((userDetailFailure) => null, (userDetail) => null);
+    either.fold((userDetailFailure) {
+      add(WelcomeEvent());
+    }, (userDetail) {});
   }
 
-  void isGetRemember() async {
+  Future<bool> isGetRemember() async {
     Either<Failure, bool> either;
     either = await isRememberMe();
+    bool isChecked = false;
+    either.fold((dataFailure) => add(WelcomeEvent()), (boolVal) {
+      isChecked = boolVal;
+    });
 
-    either.fold((dataFailure) => null, (boolVal) => null);
+    return isChecked;
   }
 
-  void saveLoginData(String emailId, String password) async {
+  void checkLogin(String emailId, String password) async {
     Either<Failure, bool> either;
     either = await checkLoginData(emailId: emailId, password: password);
 
-    either.fold((lloginFailure) => null, (loginData) => null);
+    either.fold((lloginFailure) => add(WelcomeEvent()), (loginData) {
+      if (loginData == true) {
+        add(LogoutEvent());
+      } else {
+        add(SignInEvent());
+      }
+    });
   }
 }

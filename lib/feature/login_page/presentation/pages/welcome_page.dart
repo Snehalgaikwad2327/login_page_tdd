@@ -33,7 +33,7 @@ class WelcomePageState extends State<WelcomePage> {
             ),
           ),
           const SizedBox(
-            height: 80.0,
+            height: 400.0,
           ),
           CustomButton(
               text: "Get Started",

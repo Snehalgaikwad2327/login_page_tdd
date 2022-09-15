@@ -5,13 +5,13 @@ import '../../../../core/error/failure.dart';
 
 abstract class UserDetailsRepository {
   Future<Either<Failure, UserDetails>> getUserDetails();
-  Future setUserDetails(UserDetails userDetails);
+  Future<Either<Failure, bool>> setUserDetails(UserDetails userDetails);
 
   Future<Either<Failure, bool>> isRemember();
-  Future setRememberData(bool value);
+  Future<Either<Failure, bool>> setRememberData(bool value);
 
   Future<Either<Failure, String>> getScreenName();
-  Future setScreenName(String screenName);
+  Future<Either<Failure, bool>> setScreenName(String screenName);
 
   Future<Either<Failure, bool>> checkLoginData(String emailId, String password);
 }

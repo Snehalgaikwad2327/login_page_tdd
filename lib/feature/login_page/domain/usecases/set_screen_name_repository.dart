@@ -8,7 +8,7 @@ class SetScreenName {
 
   SetScreenName(this.repository);
 
-  Future<Either<Failure, String>> call({
+  Future<Either<Failure, bool>> call({
     required String screenName,
   }) async {
     return await repository.setScreenName(screenName);

@@ -20,7 +20,7 @@ class UserDetailsRepositoryImpl implements UserDetailsRepository {
     try {
       return Right(await localDataSource.checkLoginData(emailId, password));
     } on CacheException {
-      throw Left(CacheFailure());
+      return Left(CacheFailure());
     }
   }
 
@@ -29,7 +29,7 @@ class UserDetailsRepositoryImpl implements UserDetailsRepository {
     try {
       return Right(await localDataSource.getUserDetails());
     } on CacheException {
-      throw Left(CacheFailure());
+      return Left(CacheFailure());
     }
   }
 
@@ -38,27 +38,27 @@ class UserDetailsRepositoryImpl implements UserDetailsRepository {
     try {
       return Right(await localDataSource.isRemember());
     } on CacheException {
-      throw Left(CacheFailure());
+      return Left(CacheFailure());
     }
   }
 
   @override
-  Future setRememberData(bool value) async {
+  Future<Either<Failure, bool>> setRememberData(bool value) async {
     try {
-      return await localDataSource.setRememberData(value);
+      return Right(await localDataSource.setRememberData(value));
     } on CacheException {
-      throw Left(CacheFailure());
+      return Left(CacheFailure());
     }
   }
 
   @override
-  Future setUserDetails(UserDetails userDetails) async {
+  Future<Either<Failure, bool>> setUserDetails(UserDetails userDetails) async {
     try {
-      return await localDataSource.setUserDetails(UserDetailsModel(
+      return Right(await localDataSource.setUserDetails(UserDetailsModel(
           name: userDetails.name,
           age: userDetails.age,
           emailId: userDetails.emailId,
-          password: userDetails.password));
+          password: userDetails.password)));
     } on CacheException {
       return Left(CacheFailure());
     }
@@ -74,9 +74,9 @@ class UserDetailsRepositoryImpl implements UserDetailsRepository {
   }
 
   @override
-  Future setScreenName(String screenName) async {
+  Future<Either<Failure, bool>> setScreenName(String screenName) async {
     try {
-      return await localDataSource.setScreenName(screenName);
+      return Right(await localDataSource.setScreenName(screenName));
     } on CacheException {
       return Left(CacheFailure());
     }

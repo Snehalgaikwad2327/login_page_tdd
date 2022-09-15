@@ -23,8 +23,6 @@ class LoginScreenState extends State<LoginScreen> {
   late String _email;
   late String _password;
 
-  bool _autoValidate = false;
-
   late bool _passwordVisible;
 
   @override
@@ -91,6 +89,7 @@ class LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: Colors.black, fontSize: 20),
                         decoration: InputDecoration(
                           border: InputBorder.none,
+                          icon: Icon(Icons.person),
                           hintText: "Enter Email",
                         ),
                       ),
@@ -126,6 +125,7 @@ class LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: Colors.black, fontSize: 20),
                         decoration: InputDecoration(
                             border: InputBorder.none,
+                            icon: Icon(Icons.lock),
                             hintText: "Enter Password",
                             suffixIcon: IconButton(
                               onPressed: () {
@@ -153,11 +153,8 @@ class LoginScreenState extends State<LoginScreen> {
                   text: "Login",
                   onpress: () {
                     if (_formKey.currentState!.validate()) {
-                      BlocProvider.of<LoginBloc>(context).applyLogout();
-                    } else {
-                      setState(() {
-                        _autoValidate = true;
-                      });
+                      BlocProvider.of<LoginBloc>(context).checkLogin(
+                          _emailController.text, _passwordController.text);
                     }
                   })
             ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/login_bloc.dart';
 import '../widgets/button.dart';
 
 class LogoutScreen extends StatefulWidget {
@@ -18,7 +20,9 @@ class LogoutScreenState extends State<LogoutScreen> {
           actions: <Widget>[
             CustomButton(
               text: "Logout",
-              onpress: () {},
+              onpress: () {
+                BlocProvider.of<LoginBloc>(context).applySignIn();
+              },
             )
           ],
         ),
@@ -34,7 +38,7 @@ class LogoutScreenState extends State<LogoutScreen> {
             // ignore: prefer_const_literals_to_create_immutables
             children: <Widget>[
               const Text(
-                "Logged Screen",
+                "Home Screen",
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
